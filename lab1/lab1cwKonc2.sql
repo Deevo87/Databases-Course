@@ -1,4 +1,4 @@
-select title from title
+select title  from title
 order by title
 
 select member_no, isbn, fine_assessed, 2*fine_assessed as 'Double fine' from loanhist

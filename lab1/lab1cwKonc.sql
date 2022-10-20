@@ -11,7 +11,7 @@ where author in ('Charles Dickens','Jane Austen')
 select title_no, title from title
 where title like  '%adventures%'
 
-select member_no, fine_assessed, fine_paid from loanhist
+select member_no, fine_assessed, fine_paid, fine_waived from loanhist
 where ISNULL(fine_assessed, 0) - ISNULL(fine_waived, 0) > ISNULL(fine_paid, 0)
 
 select distinct  city, state from adult
