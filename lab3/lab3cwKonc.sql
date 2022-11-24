@@ -73,7 +73,7 @@ select * from Employees
     inner join Orders O on E.EmployeeID = O.EmployeeID
     inner join [Order Details] [O D] on O.OrderID = [O D].OrderID
     full outer join Employees Podwladni on E.EmployeeID = Podwladni.ReportsTo
-    where Podwladni.ReportsTo is NULL or E.EmployeeID is null
+    where Podwladni.ReportsTo is NULL
     group by concat(E.firstname, ' ', E.lastname)
     having sum(convert(money, ([O D].Quantity * [O D].UnitPrice * (1 - [O D].Discount)))) is not null
 

@@ -1,11 +1,11 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project version="4">
   <component name="DataSourceManagerImpl" format="xml" multifile-model="true">
-    <data-source source="LOCAL" name="SERWER AGH" uuid="03bceab1-2281-4963-b76c-91e2a3b7c261">
+    <data-source source="LOCAL" name="Northwind 2" uuid="03bceab1-2281-4963-b76c-91e2a3b7c261">
       <driver-ref>sqlserver.ms</driver-ref>
       <synchronize>true</synchronize>
       <jdbc-driver>com.microsoft.sqlserver.jdbc.SQLServerDriver</jdbc-driver>
-      <jdbc-url>jdbc:sqlserver://dbmanage.lab.ii.agh.edu.pl:1433</jdbc-url>
+      <jdbc-url>jdbc:sqlserver://dbmanage.lab.ii.agh.edu.pl:1433;database=Northwind2</jdbc-url>
       <working-dir>$ProjectFileDir$</working-dir>
     </data-source>
     <data-source source="LOCAL" name="Microsoft SQL Server LocalDB" uuid="61859ec0-21e0-4e36-9147-66c1a3df8cae">
@@ -30,6 +30,13 @@
       <synchronize>true</synchronize>
       <jdbc-driver>com.microsoft.sqlserver.jdbc.SQLServerDriver</jdbc-driver>
       <jdbc-url>jdbc:sqlserver://dbmanage.lab.ii.agh.edu.pl;database=library</jdbc-url>
+      <working-dir>$ProjectFileDir$</working-dir>
+    </data-source>
+    <data-source source="LOCAL" name="@dbmanage.lab.ii.agh.edu.pl" uuid="0d7203f2-0e39-4ed7-be47-bc84c3147fe1">
+      <driver-ref>sqlserver.ms</driver-ref>
+      <synchronize>true</synchronize>
+      <jdbc-driver>com.microsoft.sqlserver.jdbc.SQLServerDriver</jdbc-driver>
+      <jdbc-url>jdbc:sqlserver://dbmanage.lab.ii.agh.edu.pl:1433</jdbc-url>
       <working-dir>$ProjectFileDir$</working-dir>
     </data-source>
   </component>

@@ -23,15 +23,16 @@ having sum(Quantity) >250
 --cw3
 select  EmployeeID, count(*) AS ORDERS from Orders group by EmployeeID
 
-SELECT o.ShipVia as Spedytor,  sum(convert(money, Quantity * UnitPrice * (1 - Discount))) as 'Opłata za przesyłke'  from Orders o inner join [Order Details] [O D] on o.OrderID = [O D].OrderID
+SELECT ShipVia as Spedytor,  sum(Freight) as 'oplata za przesylke' from Orders
 where ShippedDate between '1996/1/1' and '1997/12/31'
-group by o.ShipVia
+group by ShipVia
 
 
 ---cw 4
 select  EmployeeID,year(OrderDate) as rok, month(OrderDate) as miesiac, count(EmployeeID) AS ORDERS from Orders
 where EmployeeID IS NOT NULL
 group by EmployeeID, year(OrderDate), month(OrderDate)
+order by EmployeeID, year(OrderDate), month(OrderDate)
 
 select CategoryID, min(UnitPrice) as min, max(UnitPrice) as max from Products
 group by CategoryID
