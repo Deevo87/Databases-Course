@@ -74,14 +74,14 @@ select O.OrderId, (sum(convert(money, OD.UnitPrice * OD.Quantity * (1-OD.Discoun
 
 SELECT C.Address FROM Customers AS C
 WHERE C.CustomerID NOT IN
-    ( SELECT O.CustomerID FROM Orders AS O WHERE year(O.OrderDate) = 1997 )
+    ( SELECT  O.CustomerID FROM Orders AS O WHERE year(O.OrderDate) = 1997 )
 
 select x.ProductId, count(Distinct x.CustomerID) as wynik from
     (select Distinct P.ProductId, O.CustomerID from Products as P
     inner join [Order Details] [O D] on P.ProductID = [O D].ProductID
     inner join Orders O on O.OrderID = [O D].OrderID) as x
 group by x.ProductId
-having count(*)  >1
+having count(Distinct x.CustomerID)  >1
 
 --cw 5
 SELECT concat(E.FirstName, ' ' ,E.LastName) as imienazw, (select sum(Freight) from Orders as oi where E.EmployeeID = oi.EmployeeID) + sum(convert(money, [O D].Quantity * [O D].UnitPrice * (1 - [O D].Discount))) as 'kwota', (select  TOP 1 ShippedDate from Orders as ord where E.EmployeeID = ord.EmployeeID order by ShippedDate DESC ) from Employees as E
@@ -93,7 +93,10 @@ group by concat(E.FirstName, ' ' ,E.LastName), E.EmployeeID
 
 
  ---5.1
- SELECT concat(E.FirstName, ' ' ,E.LastName) as imienazw, (select sum(Freight) from Orders as oi where E.EmployeeID = oi.EmployeeID) + sum(convert(money, [O D].Quantity * [O D].UnitPrice * (1 - [O D].Discount))) as 'kwota' from Employees as E
+ SELECT concat(E.FirstName, ' ' ,E.LastName) as imienazw,
+        (select sum(Freight) from Orders as oi where E.EmployeeID = oi.EmployeeID)
+            +
+        sum(convert(money, [O D].Quantity * [O D].UnitPrice * (1 - [O D].Discount))) as 'kwota' from Employees as E
 inner join Orders O on E.EmployeeID = O.EmployeeID
 inner join [Order Details] [O D] on O.OrderID = [O D].OrderID
 group by concat(E.FirstName, ' ' ,E.LastName), E.EmployeeID

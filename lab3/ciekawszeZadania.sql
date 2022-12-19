@@ -113,7 +113,7 @@ select m.member_no, m.firstname+' '+ m.lastname as name, a2.street,
 
 select  E.EmployeeID, count(Distinct Orders.OrderID) as l_zamowien, sum(convert(money, [O D].Quantity * [O D].UnitPrice * (1- [O D].Discount) )) + sum(convert(money, Freight)) from Orders
 inner join [Order Details] [O D] on Orders.OrderID = [O D].OrderID
-Left outer join Employees E on Orders.EmployeeID = E.EmployeeID
+Right outer join Employees E on Orders.EmployeeID = E.EmployeeID
 where year(ShippedDate) = 1997 and month(ShippedDate) =2
 group by E.EmployeeID
 union
@@ -121,8 +121,43 @@ select E.EmployeeId, 0, 0 from Employees E
 where EmployeeID not in (select Distinct EmployeeID from Orders where year(ShippedDate) = 1997 and month(ShippedDate) =2)
 
 
-select * from Orders where year(ShippedDate) = 1997 and month(ShippedDate) =2
-order by EmployeeID
+select O.ShipVia, sum(Freight) from Orders O
+    group by O.ShipVia
+
+select Distinct O.ShipVia, (select sum(Freight) from Orders o2 where o2.ShipVia = O.ShipVia) from Orders O
+
+    --- ci mają podwłądnych
+ select a.EmployeeID from Employees as a
+ inner join Employees as b on a.EmployeeID = b.ReportsTo
+
+-- Dla każdego klienta najczęsciej zamawianą kategorię
+
+--- Podzapytania
+with counts as (select C.CustomerId, P.CategoryID, sum(Quantity) as zamowien from Customers C
+                 Inner Join Orders O on C.CustomerID = O.CustomerID
+                 INNER JOIN [Order Details] [O D] on O.OrderID = [O D].OrderID
+                 INNER JOIN Products P on P.ProductID = [O D].ProductID
+                 group by C.CustomerId, P.CategoryID
+                 ),
+    maxperclient as (select c.CustomerId, max(c.zamowien) maxclient from counts c
+                     group by c.CustomerId  )
+select * from counts
+ where counts.zamowien = (select maxclient from maxperclient where maxperclient.CustomerID = counts.CustomerID)
+
+--- Bez podzapytań
+select * from (select C.CustomerID, P.CategoryID, sum(Quantity) as ilosc, ROW_NUMBER() over (PARTITION BY C.CustomerID ORDER BY sum(Quantity) desc) as 'row'  from Customers C
+    inner join Orders O on C.CustomerID = O.CustomerID
+    inner join [Order Details] [O D] on O.OrderID = [O D].OrderID
+    INNER JOIN Products P on P.ProductID = [O D].ProductID
+    group by C.CustomerID, P.CategoryID
+    ) as tab
+where tab.row = 1
+
+
+
+
+
+
 
 --- również błąd w liczeniu liczby zamówień
 with table1 as

@@ -142,8 +142,24 @@ select concat(firstname, ' ', lastname) as nazwa , count(*) as l_dzieci from adu
     having count(*)  =3
 
 
+SELECT a.employeeid, LEFT(a.lastname,10) AS name
+,LEFT(a.title,10) AS title
+,b.employeeid, LEFT(b.lastname,10) AS name
+,LEFT(b.title,10) AS title
+FROM employees AS a
+INNER JOIN employees AS b
+ON a.title = b.title
+WHERE a.employeeid < b.employeeid
 
 
 
+select przeloz.EmployeeID, podw.EmployeeID from Employees przeloz
+inner join Employees podw on podw.ReportsTo = przeloz.EmployeeID
 
+select b.EmployeeID from Employees a
+inner join Employees b on a.EmployeeID = b.ReportsTo
+
+--- ci mają podwłądnych
+ select a.EmployeeID from Employees as a
+ inner join Employees as b on a.EmployeeID = b.ReportsTo
 

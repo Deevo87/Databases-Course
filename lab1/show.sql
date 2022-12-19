@@ -1,9 +1,8 @@
- select Distinct C.CompanyName, C.Phone from Customers as C
-     where C.CustomerID NOT IN (
-select Distinct C.CustomerID from Customers as C
-inner join Orders O on C.CustomerID = O.CustomerID
+ SELECT concat(E.FirstName, ' ' ,E.LastName) as imienazw,
+        (select sum(Freight) from Orders as oi where E.EmployeeID = oi.EmployeeID)
+            +
+        sum(convert(money, [O D].Quantity * [O D].UnitPrice * (1 - [O D].Discount))) as 'kwota' from Employees as E
+inner join Orders O on E.EmployeeID = O.EmployeeID
 inner join [Order Details] [O D] on O.OrderID = [O D].OrderID
-inner join Products P on P.ProductID = [O D].ProductID
-inner join Categories C2 on C2.CategoryID = P.CategoryID
-where C2.CategoryName = 'Confections'
-)
+group by concat(E.FirstName, ' ' ,E.LastName), E.EmployeeID
+ ORDER BY kwota DESC

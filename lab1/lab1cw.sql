@@ -34,3 +34,8 @@ order by Country, CompanyName
 select phone, fax from Suppliers
 
 select isnull(phone,'') + ',' + isnull(Fax,'') as zad from Suppliers
+
+--- ci mają podwłądnych
+ select a.EmployeeID from Employees as a
+ inner join Employees as b on a.EmployeeID = b.ReportsTo
+
