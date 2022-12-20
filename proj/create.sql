@@ -1,5 +1,5 @@
 -- Created by Vertabelo (http://vertabelo.com)
--- Last modification date: 2022-12-19 17:45:18.019
+-- Last modification date: 2022-12-20 08:01:07.34
 
 -- tables
 -- Table: Admins
@@ -50,7 +50,6 @@ CREATE TABLE Customers (
 );
 
 -- Table: DiscountConditions
--- Table: DiscountConditions
 CREATE TABLE DiscountConditions (
     ConditionsID int  NOT NULL IDENTITY(1, 1),
     Z1 int  NOT NULL CHECK (Z1 > 0),
@@ -82,13 +81,13 @@ CREATE TABLE Discounts (
     CustomerID int  NOT NULL,
     DiscountType varchar(30)  NOT NULL CHECK (discountType IN ('lifetime', 'temporary')),
     StartDate smalldatetime  NULL,
-    EndDate datetime  NULL,
+    EndDate smalldatetime  NULL,
     UsedDate smalldatetime  NULL,
     ParamsID int  NOT NULL,
     ConditionsID int  NOT NULL,
-    CONSTRAINT chk_date CHECK (ISNULL(EndDate, '1/1/2099') > ISNULL(StartDate, '1/1/2000')),
-    CONSTRAINT bottm_date CHECK (ISNULL(StartDate, '1/1/2099') > '1/1/2000'),
-    CONSTRAINT usedDate CHECK (ISNULL(UsedDate, '1/1/2099') > ISNULL(StartDate, '1/1/2000') AND ISNULL(UsedDate, '1/1/1999') < ISNULL(EndDate, '1/1/2000')),
+    CONSTRAINT chk_datediscoutns CHECK (ISNULL(EndDate, '1/1/2030') > ISNULL(StartDate, '1/1/2000')),
+    CONSTRAINT bottm_datediscounts CHECK (ISNULL(StartDate, '1/1/2030') > '1/1/2020'),
+    CONSTRAINT usedDatediscounts CHECK (ISNULL(UsedDate, '1/1/2030') > ISNULL(StartDate, '1/1/2000') AND ISNULL(UsedDate, '1/1/2018') < ISNULL(EndDate, '1/1/2019')),
     CONSTRAINT Discounts_pk PRIMARY KEY  (DiscountID)
 );
 
@@ -121,7 +120,6 @@ CREATE TABLE Invoices (
     InvoiceID int  NOT NULL IDENTITY(1, 1),
     Date smalldatetime  NOT NULL,
     CustomerID int  NOT NULL,
-    OrderID int  NOT NULL,
     Address varchar(100)  NOT NULL,
     CityID int  NOT NULL,
     PostalCode varchar(10)  NOT NULL,
@@ -153,7 +151,7 @@ CREATE TABLE OrderDetails (
     ProductID int  NOT NULL,
     UnitPrice money  NOT NULL CHECK (UnitPrice>0),
     Quantity int  NOT NULL CHECK (Quantity > 0),
-    CONSTRAINT OrderDetails_pk PRIMARY KEY  (OrderID)
+    CONSTRAINT OrderDetails_pk PRIMARY KEY  (OrderID,ProductID)
 );
 
 -- Table: Orders

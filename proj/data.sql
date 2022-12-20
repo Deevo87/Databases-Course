@@ -1,8 +1,7 @@
+set dateformat mdy
 Insert Into Countries (Name)
-VALUES ('Polska')
+VALUES ('Polska'), ('Niemcy')
 
-Insert Into Countries (Name)
-VALUES ('Niemcy')
 
 INSERT Into Cities (Name, CountryID)
 VALUES ('Kraków', 1), ('Warszawa', 1), ('Berlin', 2), ('Dortmund', 2)
@@ -37,7 +36,7 @@ INSERT INTO Products (Name, CategoryID, Description) values
                 ('Milk', 3, 'Flavoured milk'), ('Butter', 3, 'Brilliant butter')
 
 
-select * from DiscountConditions
+
 
 Insert into DiscountParams (R1, R2, InDate, OutDate) values
             (0.2, 0.1, '11/12/2022', '12/15/2022'), (0.3, 0.2, '12/16/2022', '3/3/2023')
@@ -45,10 +44,57 @@ Insert into DiscountParams (R1, R2, InDate, OutDate) values
 INSERT into DiscountConditions (Z1, K1, K2, D1, InDate, OutDate)
 values (4, 40, 30, 8, '11/12/2022', '12/15/2022'), (5, 50, 30, 15, '12/16/2022', '3/3/2023')
 
-select convert(smalldatetime, '1/1/2022')
-
-INSERT INTO Discounts (CustomerID, DiscountType, StartDate, ParamsID, ConditionsID)
-values  (4, 'lifetime',  '1/1/2022', 1, 1)
 
 
-select * from Discounts
+
+
+INSERT INTO Discounts (CustomerID, DiscountType, StartDate, EndDate, UsedDate, ParamsID, ConditionsID)
+values  (4, 'lifetime', '1/6/2022', null, null, 2, 2),
+        (5, 'temporary', '12/19/2022', '1/30/2023', null, 1, 2),
+        (6, 'lifetime',  '1/3/2022' , null, null, 1, 1)
+
+INSERT into Invoices (Date, CustomerID, Address, CityID, PostalCode) values
+                    ('1/1/2022', 7, 'Kawiory 18', 1, '62-200'),
+                    ('12/15/2022', 8, 'Kawiory 14', 1, '30-059')
+
+INSERT into Orders (CustomerID, EmployeeID, OrderDate, ReceiveDate, IsPaid, TakeOut, InvoiceID, DiscountID) values
+                    (4, 1, '1/1/2022', '12/31/2022', 1, 1, null, 1),
+                    (5, 1, '12/3/2022', '12/30/2022', 1, 0, null, 2),
+                    (7, 2,'12/12/2022', '12/30/2022', 0, 0, 1, null),
+                    (8, 2,'12/14/2022', '12/30/2022', 0, 0, 2, null)
+
+
+INSERT into OrderDetails (OrderID, ProductID, UnitPrice, Quantity) VALUES
+                        (1,2, 30, 3), (1,1,20,3), (1,3, 15, 2),
+                        (2,2,40,5), (2,6,4,4), (2,5,4,3),
+                        (3,4,40,3), (3,5,80,2), (3,1,20,4),
+                        (4,2,40,3), (4,4,50,2), (4,5,20,3)
+
+
+INSERT into Reservations (OrderID, ReservationDate, DoneReservationDate, NumberOfGuests, CompanyID, Confirmed) values
+                            ( 3, '1/3/2023', '1/2/2022',8, null, 1),
+                            ( 4, '1/13/2023', '1/12/2022',6, null, 1),
+                            ( null, '12/30/2022', '12/20/2022',8, 8, 1)
+
+
+SET IDENTITY_INSERT Tables ON
+INSERT into Tables (TableID)values
+                (1), (2), (3), (4), (5), (6)
+SET IDENTITY_INSERT Tables OFF
+
+
+INSERT Into ReservationDetails (ReservationID, TableID) values
+                                (1, 1), (1,2), (2,3), (2,4), (3,1), (3,4)
+
+
+INSERT into Menus (InDate, OutDate) values
+                ('12/30/2022', '1/10/2023'),
+                ('12/25/2022', '12/29/2022')
+
+INSERT into MenuDetails (MenuID, ProductID, UnitPrice) values
+                        (1, 3, 20), (1,2, 100), (1,4,50), (1,5, 50),
+                         (2, 1, 20), (2,4, 100), (2,6,50), (2,2, 50), (2,3,14)
+
+
+
+
