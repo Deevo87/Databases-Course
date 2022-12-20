@@ -96,4 +96,27 @@ left outer join Discounts D on PC.CustomerID = D.CustomerID
 left join DiscountParams DP on D.ParamsID = DP.ParamsID
 group by C.CustomerID, U.Name, pc.CustomerID
 
+--UnpaidOrders
+CREATE VIEW UnpaidOrders as
+select O.CustomerID, U.Name,
+    convert(money,SUM(OD.UnitPrice * OD.Quantity * ( 1 -IIF(D.DiscountType = 'lifetime', isnull(DP.R1, 0), isnull(DP.R2, 0))))) as 'Spending'
+from Orders as O
+inner join OrderDetails OD on O.OrderID = OD.OrderID
+inner join Customers C on O.CustomerID = C.CustomerID
+inner join Users U on C.CustomerID = U.UserID
+left outer join Discounts D on O.DiscountID = D.DiscountID
+inner join DiscountParams DP on D.ParamsID = DP.ParamsID
+where O.IsPaid = 0
+group by O.CustomerID, U.Name
+
+--MealsInfo
+CREATE VIEW MealsInfo AS
+select P.Name, C.Name, P.Description from Products as P
+inner join Categories C on C.CategoryID = P.CategoryID
+
+--CurrentMenu
+CREATE VIEW CurrentMenu AS
+select ProductID, UnitPrice from MenuDetails  as MD
+inner join Menus M on M.MenuID = MD.MenuID
+where GETDATE() between M.InDate and M.OutDate
 

@@ -131,6 +131,3 @@ WHERE E.EmployeeID NOT IN (
     )
 group by concat(E.FirstName, ' ' ,E.LastName), E.EmployeeID
  ORDER BY kwota DESC
-
-
-
