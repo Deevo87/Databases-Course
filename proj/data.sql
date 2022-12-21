@@ -54,14 +54,15 @@ values  (4, 'lifetime', '1/6/2022', null, null, 2, 2),
         (6, 'lifetime',  '1/3/2022' , null, null, 1, 1)
 
 INSERT into Invoices (Date, CustomerID, Address, CityID, PostalCode) values
+                    ('1/1/2022', 4, 'Kawiory 18', 1, '62-200'),
                     ('1/1/2022', 7, 'Kawiory 18', 1, '62-200'),
                     ('12/15/2022', 8, 'Kawiory 14', 1, '30-059')
 
 INSERT into Orders (CustomerID, EmployeeID, OrderDate, ReceiveDate, IsPaid, TakeOut, InvoiceID, DiscountID) values
-                    (4, 1, '1/1/2022', '12/31/2022', 1, 1, null, 1),
+                    (4, 1, '1/1/2022', '12/31/2022', 1, 1, 1, 1),
                     (5, 1, '12/3/2022', '12/30/2022', 1, 0, null, 2),
-                    (7, 2,'12/12/2022', '12/30/2022', 0, 0, 1, null),
-                    (8, 2,'12/14/2022', '12/30/2022', 0, 0, 2, null)
+                    (7, 2,'12/12/2022', '12/30/2022', 0, 0, 2, null),
+                    (8, 2,'12/14/2022', '12/30/2022', 0, 0, 3, null)
 
 
 INSERT into OrderDetails (OrderID, ProductID, UnitPrice, Quantity) VALUES
