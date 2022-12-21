@@ -8,8 +8,6 @@ where P.ProductID in (
     where InDate < GETDATE() and DATEDIFF(DAY, OutDate, getdate()) < 14
     )
 
-
-
 ---Upcoming Reservations
 CREATE VIEW UpcomingReservations
 AS
@@ -24,9 +22,6 @@ left outer join Discounts D on O.DiscountID = D.DiscountID
 left outer join DiscountParams DP on D.ParamsID = DP.ParamsID
 where ReservationDate >= GETDATE() -- tutaj nie powinno byc komentarza ale dla celow demonstracyjnych jest
 group by R.ReservationID, R.NumberOfGuests, R.Confirmed,R.DoneReservationDate, R.ReservationDate, O.OrderID, U.Name
-
-
-
 
 --upcoming orders
 CREATE VIEW UpcomingOrders
@@ -43,12 +38,8 @@ left outer join DiscountParams DP on D.ParamsID = DP.ParamsID
 where O.ReceiveDate > GETDATE()
 group by O.OrderID, O.ReceiveDate, O.TakeOut, O.IsPaid
 
-
-
-
-
---order stats
-CREATE VIEW OrderStatistics
+--OrderStatisticsMonthly
+CREATE VIEW OrderStatisticsMonthly
 AS
 SELECT YEAR(O.OrderDate) as 'year', MONTH(O.OrderDate) as 'month' ,
 convert(money,SUM(OD.UnitPrice * OD.Quantity * ( 1 -IIF(D.DiscountType = 'lifetime', isnull(DP.R1, 0), isnull(DP.R2, 0))))) as 'Total income',
@@ -60,6 +51,20 @@ inner join OrderDetails OD on O.OrderID = OD.OrderID
 left outer join Discounts D on O.DiscountID = D.DiscountID
 left outer join DiscountParams DP on D.ParamsID = DP.ParamsID
 group by YEAR(O.OrderDate), MONTH(O.OrderDate)
+
+--OrderStatisticsWeekly
+CREATE VIEW OrderStatisticsWeekly
+AS
+SELECT YEAR(O.OrderDate) as 'year', DATEPART(week, O.OrderDate) as 'week' ,
+convert(money,SUM(OD.UnitPrice * OD.Quantity * ( 1 -IIF(D.DiscountType = 'lifetime', isnull(DP.R1, 0), isnull(DP.R2, 0))))) as 'Total income',
+convert(money,AVG(OD.UnitPrice * OD.Quantity * ( 1 -IIF(D.DiscountType = 'lifetime', isnull(DP.R1, 0), isnull(DP.R2, 0))))) as 'Avg price',
+COUNT(O.OrderID) as 'Number of orders',
+COUNT(O.DiscountID) as 'Used discounts'
+from Orders O
+inner join OrderDetails OD on O.OrderID = OD.OrderID
+left outer join Discounts D on O.DiscountID = D.DiscountID
+left outer join DiscountParams DP on D.ParamsID = DP.ParamsID
+group by YEAR(O.OrderDate), DATEPART(week, O.OrderDate)
 
 ---MonthlyTableReservationCount
 CREATE VIEW MonthlyTableReservationCount
@@ -122,14 +127,14 @@ group by O.CustomerID, U.Name
 
 --MealsInfo
 CREATE VIEW MealsInfo AS
-select P.Name as ProductName, C.Name as CategoryName, P.Description from Products as P
-inner join Categories C on C.CategoryID = P.CategoryID
+    select P.Name as ProductName, C.Name as CategoryName, P.Description from Products as P
+    inner join Categories C on C.CategoryID = P.CategoryID
 
 --CurrentMenu
 CREATE VIEW CurrentMenu AS
-select ProductID, UnitPrice from MenuDetails  as MD
-inner join Menus M on M.MenuID = MD.MenuID
-where GETDATE() between M.InDate and M.OutDate
+    select ProductID, UnitPrice from MenuDetails  as MD
+    inner join Menus M on M.MenuID = MD.MenuID
+    where GETDATE() between M.InDate and M.OutDate
 
 --FreeTablesForToday
 CREATE VIEW FreeTablesForToday AS
@@ -191,4 +196,20 @@ CREATE VIEW DiscountReportsWeekly as
     INNER JOIN DiscountConditions DC on DC.ConditionsID = D.ConditionsID
     INNER JOIN DiscountParams DP on DP.ParamsID = D.ParamsID
     group by D.CustomerID, D.DiscountType, YEAR(D.StartDate), datepart( week ,D.StartDate)
+
+--MealsOrderCountMonthly
+CREATE VIEW MealsOrderCountMonthly as
+    select YEAR(O.OrderDate) year, MONTH(O.OrderDate) month, P.name, isNULL(count(OD.ProductID), 0) [ordered times]
+    from Products as P
+    inner join OrderDetails OD on P.ProductID = OD.ProductID
+    inner join Orders O on O.OrderID = OD.OrderID
+    group by YEAR(O.OrderDate), MONTH(O.OrderDate), P.name
+
+--MealsOrderCountWeekly
+CREATE VIEW MealsOrderCountWeekly as
+    select YEAR(O.OrderDate) year, DATEPART(week, O.OrderDate) week, P.name, isNULL(count(OD.ProductID), 0) [ordered times]
+    from Products as P
+    inner join OrderDetails OD on P.ProductID = OD.ProductID
+    inner join Orders O on O.OrderID = OD.OrderID
+    group by YEAR(O.OrderDate), DATEPART(week, O.OrderDate), P.name
 
