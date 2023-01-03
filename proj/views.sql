@@ -212,4 +212,3 @@ CREATE VIEW MealsOrderCountWeekly as
     inner join OrderDetails OD on P.ProductID = OD.ProductID
     inner join Orders O on O.OrderID = OD.OrderID
     group by YEAR(O.OrderDate), DATEPART(week, O.OrderDate), P.name
-
