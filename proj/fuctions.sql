@@ -46,10 +46,9 @@ RETURN
 CREATE FUNCTION GetMenuByID (@id int)
 returns table AS
 RETURN
-    select MD.ProductID, P.Name, MD.UnitPrice, C.Name
+    select MD.ProductID, P.Name, MD.UnitPrice
     from MenuDetails as MD
     inner join Products P on P.ProductID = MD.ProductID
-    inner join Categories C on C.CategoryID = P.CategoryID
     where MD.MenuID = @id
 
 --Funkcja zwracająca produkty sprzadane określoną ilość razy w danym okresie czasu
@@ -70,12 +69,13 @@ CREATE FUNCTION GetPriceOnSpecificDay (@data date)
 returns int
 AS
 BEGIN
-    select SUM(OD.UnitPrice * OD.Quantity * ( 1 -IIF(D.DiscountType = 'lifetime', isnull(DP.R1, 0), isnull(DP.R2, 0)))) 'suma'
+    RETURN
+    (select SUM(OD.UnitPrice * OD.Quantity * ( 1 -IIF(D.DiscountType = 'lifetime', isnull(DP.R1, 0), isnull(DP.R2, 0)))) 'suma'
     from OrderDetails as OD
     inner join Orders O on OD.OrderID = O.OrderID
     left outer join Discounts D on O.DiscountID = D.DiscountID
     left outer join DiscountParams DP on D.ParamsID = DP.ParamsID
-    where YEAR(@data) = YEAR(O.OrderDate) and MONTH(@data) = MONTH(O.OrderDate) and DAY(@data) = DAY(O.OrderDate)
+    where YEAR(@data) = YEAR(O.OrderDate) and MONTH(@data) = MONTH(O.OrderDate) and DAY(@data) = DAY(O.OrderDate))
 end
 
 --Funkcja zwracająca wartość zamówień danego miesiąca
@@ -83,19 +83,20 @@ CREATE FUNCTION GetPriceOnSpecificMonth (@year int, @month int)
 returns int
 AS
 BEGIN
-    select SUM(OD.UnitPrice * OD.Quantity * ( 1 -IIF(D.DiscountType = 'lifetime', isnull(DP.R1, 0), isnull(DP.R2, 0)))) 'suma'
+    RETURN
+    (select SUM(OD.UnitPrice * OD.Quantity * ( 1 -IIF(D.DiscountType = 'lifetime', isnull(DP.R1, 0), isnull(DP.R2, 0)))) 'suma'
     from OrderDetails as OD
     inner join Orders O on OD.OrderID = O.OrderID
     left outer join Discounts D on O.DiscountID = D.DiscountID
     left outer join DiscountParams DP on D.ParamsID = DP.ParamsID
-    where YEAR(@year) = YEAR(O.OrderDate) and MONTH(@month) = MONTH(O.OrderDate)
+    where @year = YEAR(O.OrderDate) and @month = MONTH(O.OrderDate))
 end
 
 --Funkcja zwracająca klientów, którzy zamówili nie mniej niż X razy w danym okresie czasu
 CREATE FUNCTION GetClientsWithOrdersCountAboveX (@amount int, @startDate date, @endDate date)
 returns table AS
 RETURN
-    select C.CustomerID, U.Name, count(O.CustomerID)
+    select C.CustomerID, U.Name, count(O.CustomerID) 'orders'
     from Customers as C
     inner join Users U on U.UserID = C.CustomerID
     inner join Orders O on C.CustomerID = O.CustomerID
