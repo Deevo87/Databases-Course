@@ -1,4 +1,8 @@
 set dateformat mdy
+
+insert INTO GlobalVars (id, WZ, WK)
+values (1,4,5)
+
 Insert Into Countries (Name)
 VALUES ('Polska'), ('Niemcy')
 
