@@ -39,11 +39,12 @@ BEGIN
             RETURN
         END
     DELETE
-    FROM Orders
-    WHERE Orders.orderId = @orderId
-    DELETE
     FROM OrderDetails
     WHERE OrderDetails.orderId = @orderId
+
+    DELETE
+    FROM Orders
+    WHERE Orders.orderId = @orderId
 END
 GO
 
@@ -64,12 +65,15 @@ BEGIN
     DECLARE @orderId AS int
     SET @orderId = (SELECT R.orderId FROM Reservations AS R WHERE R.reservationId = @reservationId)
     EXEC CancelOrder @orderId
-    DELETE
-    FROM Reservations
-    WHERE Reservations.reservationId = @reservationId
+
     DELETE
     FROM ReservationDetails
     WHERE ReservationDetails.reservationId = @reservationId
+
+    DELETE
+    FROM Reservations
+    WHERE Reservations.reservationId = @reservationId
+
 END
 GO
 
@@ -382,6 +386,17 @@ BEGIN
             Raiserror('Product is not on menu', -1, -1)
             return
         end
+
+    if 'Seafood' = (Select C.Name from Products
+            inner join Categories C on C.CategoryID = Products.CategoryID
+            Where ProductID = @ProductId)
+    begin
+        if(DATEPART(weekday ,@OrderReceiveDate) not in (4,5,6) or @OrderReceiveDate <= GETDATE())
+        begin
+            Raiserror('Cannot order seafood right now', -1, -1)
+            return
+        end
+    end
 
     declare @orderDate smalldatetime
     set @orderDate = (select OrderDate from Orders where OrderID = @OrderId)
