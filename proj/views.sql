@@ -3,9 +3,9 @@ Create VIEW ProductsOnMenuFromPastTwoWeeks
 AS
 select P.ProductID, P.Name from Products P
 where P.ProductID in (
-    select MD.ProductID from MenuDetails as MD
-    inner join Menus M on MD.MenuID = M.MenuID
-    where InDate < GETDATE() and DATEDIFF(DAY, OutDate, getdate()) < 14
+    select MD.ProductID from Menus as M
+    inner join MenuDetails MD on MD.MenuID = M.MenuID
+    where InDate < GETDATE() and DATEDIFF(DAY, M.OutDate, getdate()) < 14
     )
 
 ---Upcoming Reservations
@@ -114,7 +114,7 @@ group by C.CustomerID, U.Name, pc.CustomerID
 
 --UnpaidOrders
 CREATE VIEW UnpaidOrders as
-select O.CustomerID, U.Name,
+select o.OrderID, O.CustomerID, U.Name,
     convert(money,SUM(OD.UnitPrice * OD.Quantity * ( 1 -IIF(D.DiscountType = 'lifetime', isnull(DP.R1, 0), isnull(DP.R2, 0))))) as 'Spending'
 from Orders as O
 inner join OrderDetails OD on O.OrderID = OD.OrderID
@@ -123,7 +123,7 @@ inner join Users U on C.CustomerID = U.UserID
 left outer join Discounts D on O.DiscountID = D.DiscountID
 left outer join DiscountParams DP on D.ParamsID = DP.ParamsID
 where O.IsPaid = 0
-group by O.CustomerID, U.Name
+group by o.OrderID, O.CustomerID, U.Name
 
 --MealsInfo
 CREATE VIEW MealsInfo AS
@@ -132,8 +132,9 @@ CREATE VIEW MealsInfo AS
 
 --CurrentMenu
 CREATE VIEW CurrentMenu AS
-    select ProductID, UnitPrice from MenuDetails  as MD
+    select P.ProductID, UnitPrice, P.Name from MenuDetails  as MD
     inner join Menus M on M.MenuID = MD.MenuID
+    INNER JOIN Products P on MD.ProductID = P.ProductID
     where GETDATE() between M.InDate and M.OutDate
 
 --FreeTablesForToday

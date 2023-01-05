@@ -7,6 +7,23 @@ BEGIN
     SET WK = @WK
 END
 Go
+
+CREATE PROCEDURE ChangeDiscountParams
+    (@R1 FLOAT, @R2 float, @InDate smalldatetime, @OutDate smalldatetime)
+as
+begin
+    insert into DiscountParams (R1, R2, InDate, OutDate)
+    values (@R1, @R2, @InDate, @OutDate)
+end
+
+CREATE PROCEDURE ChangeDiscountConditions
+    (@Z1 INT, @K1 MONEY, @K2 MONEY, @D1 INT, @InDate smalldatetime, @OutDate smalldatetime)
+as
+begin
+    insert into DiscountConditions (Z1, K1, K2, D1, InDate, OutDate)
+    values (@Z1, @K1, @K2, @D1, @InDate, @OutDate)
+end
+
 -- Anulowanie zamówienia
 CREATE PROCEDURE CancelOrder(@orderId AS int)
 AS
@@ -111,11 +128,13 @@ BEGIN
         SET @Confirmed = 0
     end
 
-    IF (NOT EXISTS(SELECT orderId FROM Orders WHERE orderId = @orderId) and @CompanyId is null)
+    IF ((NOT EXISTS(SELECT orderId FROM Orders WHERE orderId = @orderId) or
+         (select ReceiveDate from Orders where OrderID = @orderId) <> @reservationDate) and @CompanyId is null)
         BEGIN
-            RAISERROR ('No such orderId', -1, -1)
+            RAISERROR ('No such orderId or wrong reservation date', -1, -1)
             RETURN
         END
+
     IF (@CompanyId is not null) --- rezerwacja na firmę
         begin
             INSERT INTO Reservations(CompanyID,DoneReservationDate, reservationDate, numberOfGuests, Confirmed)
@@ -171,6 +190,12 @@ begin
                                     (@ReservationId, @TableId)
 end
 
+
+CREATE PROCEDURE ConfirmReservation @ReservationId INT
+as
+    begin
+        update Reservations set Confirmed = 1 where ReservationID = @ReservationId
+    end
 
 ---Menu z danego dnia
 CREATE PROCEDURE MenuOfTheDay @date SMALLDATETIME
@@ -234,6 +259,43 @@ VALUES (@inDate, @outDate)
 END
 
 
+CREATE PROCEDURE PlaceOrder
+        @CustomerID INT,
+        @EmployeeID INT,
+        @OrderDate SMALLDATETIME,
+        @ReceiveDate SMALLDATETIME,
+        @IsPaid BIT,
+        @TakeOut BIT,
+        @DiscountType VARCHAR(20),
+        @Products VARCHAR(50)
+as
+begin
+    DECLARE prodCursor CURSOR FOR
+    select value from STRING_SPLIT(@Products, ',')
+
+    declare @newId int;
+    set @newId = (select top 1 OrderID from  Orders order by  OrderID DESC ) + 1
+
+    exec AddNewOrder @CustomerID, @EmployeeID, @OrderDate, @ReceiveDate, @IsPaid, @TakeOut, @DiscountType
+
+
+    DECLARE @ProductID INT
+    OPEN prodCursor
+    FETCH NEXT FROM prodCursor INTO
+    @ProductID
+
+    while @@FETCH_STATUS = 0
+    begin
+        exec InsertToOrder @newId, @ProductID, 1
+          FETCH NEXT FROM prodCursor INTO @ProductID
+    end
+
+    CLOSE prodCursor
+    DEALLOCATE prodCursor
+
+end
+
+
 CREATE PROCEDURE AddNewOrder
     @CustomerID INT,
     @EmployeeID INT,
@@ -264,7 +326,7 @@ BEGIN
         RAISERROR ('No such employeeId', -1, -1)
         RETURN
     END
-    IF(NOT EXISTS(SELECT DiscountID FROM Discounts
+    IF(@DiscountType is not null and NOT EXISTS(SELECT DiscountID FROM Discounts
         where CustomerID = @CustomerID
         and DiscountType = @DiscountType
         and(UsedDate = null)
@@ -279,6 +341,10 @@ BEGIN
         where CustomerID = @CustomerID
         and DiscountType = @DiscountType
         and(UsedDate IS NULL))
+    if(@DiscountType is null)
+        begin
+            set @DiscountId = null
+        end
 
     INSERT into Orders (CustomerID, EmployeeID, OrderDate, ReceiveDate, IsPaid, TakeOut, DiscountID)
     VALUES (@CustomerID, @EmployeeID, @OrderDate, @ReceiveDate, @IsPaid, @TakeOut, @DiscountId)
@@ -288,6 +354,9 @@ BEGIN
         Update Discounts set UsedDate = GETDATE() WHERE DiscountID = @DiscountId
     end
 end
+go
+
+
 
 
 CREATE PROCEDURE InsertToOrder @OrderId INT,
@@ -305,6 +374,14 @@ BEGIN
         RAISERROR ('No such ProductID', -1, -1)
         RETURN
     END
+    DECLARE @OrderReceiveDate smalldatetime;
+    SET @OrderReceiveDate = (select ReceiveDate from Orders where OrderID = @OrderId)
+
+    if(not @ProductID in (select MD2.ProductID from Menus inner join MenuDetails MD2 on Menus.MenuID = MD2.MenuID where GETDATE() between InDate and OutDate))
+        begin
+            Raiserror('Product is not on menu', -1, -1)
+            return
+        end
 
     declare @orderDate smalldatetime
     set @orderDate = (select OrderDate from Orders where OrderID = @OrderId)
@@ -315,9 +392,12 @@ BEGIN
                         where ProductID = @ProductID and InDate <= @orderDate
                         order by OutDate DESC
                                              )
+    if(@UnitPrice is null)
+    begin
+        set @UnitPrice = 50
+    end
     insert INTO OrderDetails (OrderID, ProductID, UnitPrice, Quantity)
     VALUES (@OrderId, @ProductID, @UnitPrice, @Quantinty)
-
 end
 
 CREATE PROCEDURE CreateInvoice @Date smalldatetime,
@@ -346,10 +426,48 @@ begin
         declare @newIndex int
         set @newIndex = (select top 1 InvoiceID from Invoices order by InvoiceID desc) + 1
 
-
         Insert Into Invoices (Date, CustomerID, Address, CityID, PostalCode)
         values (@Date, @CustomerId, @Address, @CityId, @PostalCode)
         update Orders set InvoiceID = @newIndex where OrderID = @OrderID
+end
+
+CREATE PROCEDURE AddNewEmployee
+@BirthDate smalldatetime,
+@Position varchar(90),
+@Address varchar(90),
+@CityId int,
+@PostalCode varchar(10),
+@isManager bit,
+@ReportsTo int,
+@Name nvarchar(60),
+@PhoneNumber char(9),
+@email nvarchar(60)
+as
+begin
+    declare @newId int
+    set @newId = (select Top 1 UserId from Users order by UserID desc)
+
+    insert into Users (Name, PhoneNumber, email)
+    values (@Name, @PhoneNumber, @email)
+
+    insert into Employees (EmployeeID, BirthDate, HireDate, Position, Address, CityID, PostalCode, IsManager, ReportsTo)
+    values (@newId, @BirthDate, getdate(), @Position, @Address, @CityId, @PostalCode, @isManager, @ReportsTo)
+end
 
 
+CREATE PROCEDURE AddNewPrivateCustomer
+@Name nvarchar(60),
+@PhoneNumber char(9),
+@email nvarchar(60)
+as
+begin
+    declare @newId int
+    set @newId = (select Top 1 UserId from Users order by UserID desc)
+
+    insert into Users (Name, PhoneNumber, email)
+    values (@Name, @PhoneNumber, @email)
+
+    Insert into Customers (CustomerID) values (@newId)
+
+    INSERT into PrivateCustomers (CustomerID) values (@newId)
 end
