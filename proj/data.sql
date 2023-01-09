@@ -200,15 +200,16 @@ SET IDENTITY_INSERT Tables OFF
 INSERT Into ReservationDetails (ReservationID, TableID) values
                                 (1, 1), (1,2), (2,3), (2,4), (3,1), (3,4)
 
-
+set dateformat mdy
 INSERT into Menus (InDate, OutDate) values
-                ('12/30/2022', '1/10/2023'),
-                ('12/25/2022', '12/29/2022')
+                ('1/7/2023', '1/8/2023'),
+                ('1/9/2023', '1/10/2023'),
+                ('1/11/2023', '2/24/2023')
 
 INSERT into MenuDetails (MenuID, ProductID, UnitPrice) values
                         (1, 3, 20), (1,2, 100), (1,4,50), (1,5, 50),
-                         (2, 1, 20), (2,4, 100), (2,6,50), (2,2, 50), (2,3,14)
-
+                         (2, 1, 20), (2,4, 100), (2,6,50), (2,2, 50), (2,3,14),
+                         (3, 1, 20), (3,4, 100), (3,6,50), (3,2, 50), (3,3,14), (3, 7, 9), (3,12,15)
 
 
 

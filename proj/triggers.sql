@@ -75,10 +75,10 @@ CREATE TRIGGER OnlyOneFactors
 ON GlobalVars
 FOR INSERT
 AS
-BEGIN
-IF ((SELECT COUNT(*) FROM GlobalVars) > 1)
-BEGIN
-RAISERROR ('Too much globalVars', -1, -1)
-ROLLBACK TRANSACTION
-END
+    BEGIN
+        IF ((SELECT COUNT(*) FROM GlobalVars) > 1)
+            BEGIN
+            RAISERROR ('Too much globalVars', -1, -1)
+            ROLLBACK TRANSACTION
+        END
 END
