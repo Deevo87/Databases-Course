@@ -31,11 +31,27 @@ GRANT EXECUTE ON MenuOfTheDay to Manager
 GRANT EXECUTE ON AddNewEmployee to Manager
 GRANT EXECUTE ON InsertToMenu to Manager
 GRANT EXECUTE ON ConfirmReservation to Manager
-GRANT EXECUTE ON ConfirmReservation to Manager
 GRANT EXECUTE ON CancelOrder to Manager
 GRANT EXECUTE ON CancelReservation to Manager
 GRANT EXECUTE ON ChangeUser to Manager
 GRANT EXECUTE ON ChangeCompanyCustomer to Manager
 
 
---- dodać role Private Customer i Company Customer
+
+CREATE ROLE PrivateCustomer AUTHORIZATION dbo
+Grant EXECUTE On PlaceOrder to PrivateCustomer
+Grant EXECUTE ON CancelOrder to PrivateCustomer
+GRANT EXECUTE ON ShowFreeTablesAt to PrivateCustomer
+GRANT EXECUTE ON AddReservation to PrivateCustomer
+Grant EXECUTE On CancelReservation to PrivateCustomer
+Grant EXECUTE ON GetTotalOrderAmount to PrivateCustomer
+GRANT SELECT ON CurrentMenu to PrivateCustomer
+
+
+
+CREATE Role CompanyCustomer AUTHORIZATION dbo
+GRANT EXECUTE ON AddReservation to CompanyCustomer
+Grant EXECUTE ON AddReservationDetails to CompnayCustomer
+GRANT EXECUTE ON ShowFreeTablesAt to CompanyCustomer
+Grant EXECUTE ON CancelReservation to CompanyCustomer
+GRANT SELECT ON CurrentMenu to CompanyCustomer
