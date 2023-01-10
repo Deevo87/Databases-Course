@@ -51,7 +51,7 @@ GRANT SELECT ON CurrentMenu to PrivateCustomer
 
 CREATE Role CompanyCustomer AUTHORIZATION dbo
 GRANT EXECUTE ON AddReservation to CompanyCustomer
-Grant EXECUTE ON AddReservationDetails to CompnayCustomer
+Grant EXECUTE ON AddReservationDetails to CompanyCustomer
 GRANT EXECUTE ON ShowFreeTablesAt to CompanyCustomer
 Grant EXECUTE ON CancelReservation to CompanyCustomer
 GRANT SELECT ON CurrentMenu to CompanyCustomer
