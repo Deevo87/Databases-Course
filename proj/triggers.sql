@@ -82,3 +82,44 @@ AS
             ROLLBACK TRANSACTION
         END
 END
+
+CREATE TRIGGER UnconfirmedReservation
+ON Reservations
+FOR DELETE
+AS
+    BEGIN
+        DECLARE @ReservationID INT
+        SET @ReservationID = (SELECT ReservationID FROM deleted)
+
+        DECLARE @ReservationDate SMALLDATETIME
+        SET @ReservationDate = (SELECT ReservationDate from Reservations)
+
+        IF ((SELECT Confirmed from Reservations) = 0 AND @ReservationDate < GETDATE())
+            BEGIN
+                DELETE from Reservations where ReservationID = @ReservationID
+            END
+        ELSE
+            BEGIN
+               RAISERROR('Time to confirm reservation did not expire.', -1, -1)
+            END
+    END
+
+CREATE TRIGGER ChangedIsActive
+ON MenuDetails
+FOR INSERT
+AS
+    BEGIN
+        DECLARE @ProductID INT
+        SET @ProductID = (SELECT ProductID from inserted)
+
+        IF EXISTS(SELECT ProductID from Products as P where P.ProductID = @ProductID)
+            BEGIN
+               UPDATE Products
+               SET IsActive = 0
+               WHERE ProductID = @ProductID
+            END
+        ELSE
+            BEGIN
+                RAISERROR ('Product does not exist', -1, -1)
+            END
+    END
